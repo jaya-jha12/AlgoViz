@@ -11,6 +11,7 @@ export function computeLPS(pattern) {
     len: 0,
     action: 'Initialize: lps[0] = 0 (every string has empty prefix)',
     currentLPS: [...lps],
+    pseudocodeLine: 0,
     headers: ['Index', 'Pattern', 'LPS'],
     rows: Array.from({ length: pattern.length }, (_, idx) => [
       idx,
@@ -29,6 +30,7 @@ export function computeLPS(pattern) {
         len,
         action: `Match found: pattern[${i}]='${pattern[i]}' == pattern[${len - 1}]='${pattern[len - 1]}' → lps[${i}] = ${len}`,
         currentLPS: [...lps],
+        pseudocodeLine: 3,
         headers: ['Index', 'Pattern', 'LPS'],
         rows: Array.from({ length: pattern.length }, (_, idx) => [
           idx,
@@ -46,6 +48,7 @@ export function computeLPS(pattern) {
           len,
           action: `Mismatch: pattern[${i}]='${pattern[i]}' != pattern[${len}]='${pattern[len]}' → backtrack to lps[${len}] = ${len}`,
           currentLPS: [...lps],
+          pseudocodeLine: 6,
           headers: ['Index', 'Pattern', 'LPS'],
           rows: Array.from({ length: pattern.length }, (_, idx) => [
             idx,
@@ -60,6 +63,7 @@ export function computeLPS(pattern) {
           len: 0,
           action: `Mismatch at start: pattern[${i}]='${pattern[i]}' != pattern[0]='${pattern[0]}' → lps[${i}] = 0`,
           currentLPS: [...lps],
+          pseudocodeLine: 8,
           headers: ['Index', 'Pattern', 'LPS'],
           rows: Array.from({ length: pattern.length }, (_, idx) => [
             idx,
@@ -106,6 +110,17 @@ export function kmpSearch(text = '', pattern = '') {
   let j = 0; // index for pattern
 
   while (i < text.length) {
+    // Determine which pseudocode line is executing
+    let pseudocodeLine = 1; // While i < n
+
+    if (j > 0 && text[i] !== pattern[j]) {
+      pseudocodeLine = 7; // j > 0 check and use lps
+    } else if (text[i] === pattern[j]) {
+      pseudocodeLine = 2; // If pattern[j] == text[i]
+    } else if (j === 0) {
+      pseudocodeLine = 11; // Else increment i
+    }
+
     searchSteps.push({
       phase: 'search',
       i,
@@ -118,6 +133,7 @@ export function kmpSearch(text = '', pattern = '') {
         : j !== 0
           ? `Mismatch: text[${i}]='${text[i]}' != pattern[${j}]='${pattern[j]}' → use LPS to jump`
           : `Mismatch: text[${i}]='${text[i]}' != pattern[0]='${pattern[0]}' → move text pointer`,
+      pseudocodeLine,
       headers: ['Index', 'Text', 'Comparison'],
       rows: Array.from({ length: Math.min(i + pattern.length, text.length) }, (_, idx) => [
         idx,
@@ -141,6 +157,7 @@ export function kmpSearch(text = '', pattern = '') {
         patternIndex: j,
         matches: [...matches],
         action: `✓ Pattern found at index ${i - j}!`,
+        pseudocodeLine: 4,
         headers: ['Index', 'Text', 'Comparison'],
         rows: Array.from({ length: Math.min(i + pattern.length, text.length) }, (_, idx) => [
           idx,
