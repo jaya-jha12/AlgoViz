@@ -104,7 +104,8 @@ export  function PatternMatchingPage() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
-  
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+
   const playIntervalRef = useRef(null);
 
   const handleVisualize = () => {
