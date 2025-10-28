@@ -134,7 +134,6 @@ export  function PatternMatchingPage() {
 
   const getCurrentSteps = () => {
     if (!results) return [];
-    // ensure these are arrays even if algorithm returned undefined
     const preprocess = results.preprocessSteps || [];
     const search = results.searchSteps || [];
     return currentPhase === 'preprocessing' ? preprocess : search;
@@ -142,6 +141,12 @@ export  function PatternMatchingPage() {
 
   const currentSteps = getCurrentSteps();
   const currentStep = currentSteps?.[currentStepIndex] ?? null;
+
+  // Prepare step with matches for visualization
+  const stepWithMatches = currentStep ? {
+    ...currentStep,
+    matches: results?.matches || []
+  } : null;
 
   const handleStepForward = () => {
     if (currentStepIndex < currentSteps.length - 1) {
