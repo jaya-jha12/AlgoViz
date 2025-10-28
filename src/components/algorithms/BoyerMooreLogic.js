@@ -17,6 +17,7 @@ export function buildBadCharTable(pattern = '') {
       char: pattern[i],
       action: `Setting last occurrence of '${pattern[i]}' = ${i}`,
       table: { ...table },
+      pseudocodeLine: 2,
       headers: ['Character', 'Last Occurrence'],
       rows: rows
     });
@@ -57,6 +58,7 @@ export function boyerMooreSearch(text = '', pattern = '') {
         patternIndex: j,
         matches: [...matches],
         action: `Match at text[${s + j}] ('${text[s + j]}')`,
+        pseudocodeLine: 3,
         headers: ['Index', 'Text', 'Comparison'],
         rows: Array.from({ length: Math.min(s + m, text.length) }, (_, idx) => [
           idx,
@@ -77,6 +79,7 @@ export function boyerMooreSearch(text = '', pattern = '') {
         patternIndex: 0,
         matches: [...matches],
         action: `Pattern found at index ${s}`,
+        pseudocodeLine: 6,
         headers: ['Index', 'Text', 'Comparison'],
         rows: Array.from({ length: Math.min(s + m, text.length) }, (_, idx) => [
           idx,
@@ -105,6 +108,7 @@ export function boyerMooreSearch(text = '', pattern = '') {
         patternIndex: j,
         matches: [...matches],
         action: `Mismatch at text[${s + j}] ('${badChar}') → shift by ${shiftAmount}`,
+        pseudocodeLine: 10,
         headers: ['Index', 'Text', 'Comparison'],
         rows: Array.from({ length: Math.min(s + m, text.length) }, (_, idx) => [
           idx,
