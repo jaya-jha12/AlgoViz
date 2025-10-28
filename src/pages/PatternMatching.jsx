@@ -190,6 +190,7 @@ export  function PatternMatchingPage() {
     setIsPlaying(false);
     setCurrentPhase('preprocessing');
     setCurrentStepIndex(0);
+    setShowCompletionModal(false);
   };
 
   const handleStepChange = (index) => {
