@@ -411,6 +411,57 @@ export  function PatternMatchingPage() {
             </div>
           </Card>
         )}
+
+        {/* Completion Modal */}
+        <Modal
+          isOpen={showCompletionModal}
+          title="🎉 Search Completed!"
+          onClose={() => setShowCompletionModal(false)}
+        >
+          <div className="space-y-4">
+            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+              <p className="text-lg font-bold text-green-900 mb-2">
+                Total Matches Found: {results?.matches?.length || 0}
+              </p>
+              {(results?.matches || []).length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-green-800">
+                    The pattern "<span className="font-mono font-bold">{pattern}</span>" was found in the text:
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {(results?.matches || []).map((matchIdx, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-white border border-green-300 rounded p-3 font-mono text-sm"
+                      >
+                        <div className="font-semibold text-green-700">Match #{idx + 1}</div>
+                        <div className="text-gray-700 mt-1">Position: {matchIdx}</div>
+                        <div className="text-gray-600 text-xs mt-1">
+                          Text[{matchIdx}:{matchIdx + pattern.length}] = {text.substring(matchIdx, matchIdx + pattern.length)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-green-800">
+                  The pattern "<span className="font-mono font-bold">{pattern}</span>" was not found in the text.
+                </p>
+              )}
+            </div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Algorithm:</span> {algorithm === 'kmp' ? 'Knuth-Morris-Pratt (KMP)' : 'Boyer-Moore'}
+              </p>
+              <p className="text-sm text-gray-700 mt-2">
+                <span className="font-semibold">Text Length:</span> {text.length}
+              </p>
+              <p className="text-sm text-gray-700 mt-2">
+                <span className="font-semibold">Pattern Length:</span> {pattern.length}
+              </p>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   );
