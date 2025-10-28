@@ -205,6 +205,18 @@ export  function PatternMatchingPage() {
     };
   }, [isPlaying, speed, currentSteps, currentPhase, results]);
 
+  // Detect search completion
+  useEffect(() => {
+    if (
+      results &&
+      currentPhase === 'search' &&
+      currentStepIndex === currentSteps.length - 1 &&
+      currentSteps.length > 0
+    ) {
+      setShowCompletionModal(true);
+    }
+  }, [currentPhase, currentStepIndex, currentSteps, results]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
