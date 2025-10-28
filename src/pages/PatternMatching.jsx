@@ -91,6 +91,31 @@ const TabsContent = ({ children, value, currentTab, className = '' }) => {
   return <div className={className}>{children}</div>;
 };
 
+const Modal = ({ isOpen, title, children, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-96 overflow-y-auto">
+        <div className="sticky top-0 bg-gradient-to-r from-green-600 to-green-700 text-white p-6 border-b border-green-200">
+          <h2 className="text-2xl font-bold">{title}</h2>
+        </div>
+        <div className="p-6">
+          {children}
+        </div>
+        <div className="border-t border-gray-200 p-6 flex justify-end gap-3 bg-gray-50">
+          <Button
+            onClick={onClose}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ---------- Main Component ----------
 
 export  function PatternMatchingPage() {
