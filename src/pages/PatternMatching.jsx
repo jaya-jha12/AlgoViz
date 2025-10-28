@@ -138,7 +138,7 @@ export  function PatternMatchingPage() {
       setError('Please enter both text and pattern');
       return;
     }
-    
+
     if (pattern.length > text.length) {
       setError('Pattern cannot be longer than text');
       return;
@@ -148,6 +148,7 @@ export  function PatternMatchingPage() {
     setIsPlaying(false);
     setCurrentStepIndex(0);
     setCurrentPhase('preprocessing');
+    setShowCompletionModal(false);
 
     if (algorithm === 'kmp') {
       const result = kmpSearch(text, pattern);
