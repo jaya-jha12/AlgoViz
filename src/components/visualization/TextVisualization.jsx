@@ -2,15 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function TextVisualization({ text, pattern, currentStep, algorithm }) {
-  const [matches, setMatches] = useState([]);
   const scrollContainerRef = useRef(null);
   
-  useEffect(() => {
-    if (currentStep?.matches) {
-      setMatches(currentStep.matches);
-    }
-  }, [currentStep?.matches]);
-
   useEffect(() => {
     if (scrollContainerRef.current && currentStep) {
       const textIndex = currentStep?.i ?? currentStep?.textIndex ?? -1;
@@ -31,8 +24,12 @@ export default function TextVisualization({ text, pattern, currentStep, algorith
 
   const textIndex = currentStep?.i ?? currentStep?.textIndex ?? -1;
   const patternIndex = currentStep?.j ?? currentStep?.patternIndex ?? -1;
-  const isMatch = currentStep?.match || currentStep?.action?.includes('found') || false;
   const patternStartIndex = Math.max(0, textIndex - patternIndex);
+  
+  // Determine if current comparison is a match
+  const isCurrentMatch = textIndex >= 0 && 
+                         patternIndex >= 0 && 
+                         text[textIndex] === pattern[patternIndex];
 
   return (
     <div className="space-y-8 bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-xl shadow-lg">
@@ -66,12 +63,10 @@ export default function TextVisualization({ text, pattern, currentStep, algorith
                   let bgColor = "bg-white";
                   let borderColor = "border-gray-300";
                   
-                  if (i === textIndex && !isMatch) {
+                  // Only highlight if this is the current text index being compared
+                  if (i === textIndex && textIndex >= 0) {
                     bgColor = "bg-blue-200";
                     borderColor = "border-blue-500";
-                  } else if (matches.includes(i)) {
-                    bgColor = "bg-green-200";
-                    borderColor = "border-green-500";
                   }
 
                   return (
@@ -124,9 +119,10 @@ export default function TextVisualization({ text, pattern, currentStep, algorith
                   let bgColor = "bg-purple-100";
                   let borderColor = "border-purple-400";
                   
-                  if (i === patternIndex) {
-                    bgColor = isMatch ? "bg-green-300" : "bg-red-300";
-                    borderColor = isMatch ? "border-green-600" : "border-red-600";
+                  // Highlight current pattern index with match/mismatch color
+                  if (i === patternIndex && patternIndex >= 0) {
+                    bgColor = isCurrentMatch ? "bg-green-300" : "bg-red-300";
+                    borderColor = isCurrentMatch ? "border-green-600" : "border-red-600";
                   }
 
                   return (
@@ -146,57 +142,6 @@ export default function TextVisualization({ text, pattern, currentStep, algorith
           </div>
         </div>
       </div>
-
-      {/* STACK OF FOUND MATCHES */}
-      <AnimatePresence>
-        {matches.length > 0 && (
-          <div className="space-y-4 border-t pt-6 mt-6">
-            <div className="text-sm font-semibold text-gray-600">Matches Found</div>
-            {matches.map((matchIndex, idx) => (
-              <motion.div
-                key={`match-${matchIndex}-${idx}`}
-                initial={{ opacity: 0, y: -15, x: -20 }}
-                animate={{ opacity: 1, y: 0, x: 0 }}
-                exit={{ opacity: 0, y: 15 }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="space-y-2"
-              >
-                <div className="text-xs text-gray-600 font-medium">
-                  Match #{idx + 1} at index {matchIndex}
-                </div>
-                
-                <div className="overflow-x-auto border border-green-300 rounded-lg bg-green-50 p-3">
-                  <div className="inline-block min-w-min">
-                    {/* Index labels */}
-                    <div className="flex gap-1 mb-2">
-                      {pattern.split("").map((char, i) => (
-                        <div
-                          key={`match-idx-${matchIndex}-${i}`}
-                          className="w-10 h-6 flex items-center justify-center text-xs text-green-600 font-medium shrink-0"
-                        >
-                          {matchIndex + i}
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {/* Match characters */}
-                    <div className="flex gap-1">
-                      {pattern.split("").map((char, i) => (
-                        <div
-                          key={`match-char-${matchIndex}-${i}`}
-                          className="w-10 h-10 flex items-center justify-center border-2 border-green-500 rounded-lg font-mono font-semibold bg-green-200 text-green-900 shrink-0 transition-all"
-                        >
-                          {text[matchIndex + i]}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* STATUS INFORMATION */}
       {currentStep && (
