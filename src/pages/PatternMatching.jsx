@@ -168,12 +168,6 @@ export  function PatternMatchingPage() {
   const currentSteps = getCurrentSteps();
   const currentStep = currentSteps?.[currentStepIndex] ?? null;
 
-  // Prepare step with matches for visualization
-  const stepWithMatches = currentStep ? {
-    ...currentStep,
-    matches: results?.matches || []
-  } : null;
-
   const handleStepForward = () => {
     if (currentStepIndex < currentSteps.length - 1) {
       setCurrentStepIndex(prev => prev + 1);
