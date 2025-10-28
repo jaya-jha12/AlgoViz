@@ -333,7 +333,7 @@ export  function PatternMatchingPage() {
                 <TextVisualization
                   text={text}
                   pattern={pattern}
-                  currentStep={stepWithMatches}
+                  currentStep={currentStep}
                   algorithm={algorithm}
                 />
 
