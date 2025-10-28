@@ -91,6 +91,31 @@ const TabsContent = ({ children, value, currentTab, className = '' }) => {
   return <div className={className}>{children}</div>;
 };
 
+const Modal = ({ isOpen, title, children, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-96 overflow-y-auto">
+        <div className="sticky top-0 bg-gradient-to-r from-green-600 to-green-700 text-white p-6 border-b border-green-200">
+          <h2 className="text-2xl font-bold">{title}</h2>
+        </div>
+        <div className="p-6">
+          {children}
+        </div>
+        <div className="border-t border-gray-200 p-6 flex justify-end gap-3 bg-gray-50">
+          <Button
+            onClick={onClose}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ---------- Main Component ----------
 
 export  function PatternMatchingPage() {
@@ -104,7 +129,8 @@ export  function PatternMatchingPage() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
-  
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+
   const playIntervalRef = useRef(null);
 
   const handleVisualize = () => {
@@ -112,7 +138,7 @@ export  function PatternMatchingPage() {
       setError('Please enter both text and pattern');
       return;
     }
-    
+
     if (pattern.length > text.length) {
       setError('Pattern cannot be longer than text');
       return;
@@ -122,6 +148,7 @@ export  function PatternMatchingPage() {
     setIsPlaying(false);
     setCurrentStepIndex(0);
     setCurrentPhase('preprocessing');
+    setShowCompletionModal(false);
 
     if (algorithm === 'kmp') {
       const result = kmpSearch(text, pattern);
@@ -134,7 +161,6 @@ export  function PatternMatchingPage() {
 
   const getCurrentSteps = () => {
     if (!results) return [];
-    // ensure these are arrays even if algorithm returned undefined
     const preprocess = results.preprocessSteps || [];
     const search = results.searchSteps || [];
     return currentPhase === 'preprocessing' ? preprocess : search;
@@ -165,6 +191,7 @@ export  function PatternMatchingPage() {
     setIsPlaying(false);
     setCurrentPhase('preprocessing');
     setCurrentStepIndex(0);
+    setShowCompletionModal(false);
   };
 
   const handleStepChange = (index) => {
@@ -198,6 +225,18 @@ export  function PatternMatchingPage() {
       }
     };
   }, [isPlaying, speed, currentSteps, currentPhase, results]);
+
+  // Detect search completion
+  useEffect(() => {
+    if (
+      results &&
+      currentPhase === 'search' &&
+      currentStepIndex === currentSteps.length - 1 &&
+      currentSteps.length > 0
+    ) {
+      setShowCompletionModal(true);
+    }
+  }, [currentPhase, currentStepIndex, currentSteps, results]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
@@ -368,6 +407,57 @@ export  function PatternMatchingPage() {
             </div>
           </Card>
         )}
+
+        {/* Completion Modal */}
+        <Modal
+          isOpen={showCompletionModal}
+          title="🎉 Search Completed!"
+          onClose={() => setShowCompletionModal(false)}
+        >
+          <div className="space-y-4">
+            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+              <p className="text-lg font-bold text-green-900 mb-2">
+                Total Matches Found: {results?.matches?.length || 0}
+              </p>
+              {(results?.matches || []).length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-green-800">
+                    The pattern "<span className="font-mono font-bold">{pattern}</span>" was found in the text:
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {(results?.matches || []).map((matchIdx, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-white border border-green-300 rounded p-3 font-mono text-sm"
+                      >
+                        <div className="font-semibold text-green-700">Match #{idx + 1}</div>
+                        <div className="text-gray-700 mt-1">Position: {matchIdx}</div>
+                        <div className="text-gray-600 text-xs mt-1">
+                          Text[{matchIdx}:{matchIdx + pattern.length}] = {text.substring(matchIdx, matchIdx + pattern.length)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-green-800">
+                  The pattern "<span className="font-mono font-bold">{pattern}</span>" was not found in the text.
+                </p>
+              )}
+            </div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Algorithm:</span> {algorithm === 'kmp' ? 'Knuth-Morris-Pratt (KMP)' : 'Boyer-Moore'}
+              </p>
+              <p className="text-sm text-gray-700 mt-2">
+                <span className="font-semibold">Text Length:</span> {text.length}
+              </p>
+              <p className="text-sm text-gray-700 mt-2">
+                <span className="font-semibold">Pattern Length:</span> {pattern.length}
+              </p>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   );
