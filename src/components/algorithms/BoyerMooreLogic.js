@@ -1,15 +1,24 @@
-// src/components/algorithms/BoyerMooreLogic.js (or .jsx)
+// src/components/algorithms/BoyerMooreLogic.js
 export function buildBadCharTable(pattern = '') {
   const table = {};
   const steps = [];
 
   for (let i = 0; i < pattern.length; i++) {
     table[pattern[i]] = i;
+    
+    const rows = [];
+    const chars = new Set(pattern.substring(0, i + 1).split(''));
+    for (const char of chars) {
+      rows.push([char, table[char]]);
+    }
+    
     steps.push({
       index: i,
       char: pattern[i],
       action: `Setting last occurrence of '${pattern[i]}' = ${i}`,
       table: { ...table },
+      headers: ['Character', 'Last Occurrence'],
+      rows: rows
     });
   }
 
@@ -44,7 +53,16 @@ export function boyerMooreSearch(text = '', pattern = '') {
         phase: 'search',
         shift: s,
         j,
+        textIndex: s + j,
+        patternIndex: j,
+        matches: [...matches],
         action: `Match at text[${s + j}] ('${text[s + j]}')`,
+        headers: ['Index', 'Text', 'Comparison'],
+        rows: Array.from({ length: Math.min(s + m, text.length) }, (_, idx) => [
+          idx,
+          text[idx],
+          idx >= s && idx < s + m ? (idx === s + j ? '↓' : '✓') : ''
+        ])
       });
       j--;
     }
@@ -55,12 +73,22 @@ export function boyerMooreSearch(text = '', pattern = '') {
         phase: 'search',
         shift: s,
         j,
+        textIndex: s,
+        patternIndex: 0,
+        matches: [...matches],
         action: `Pattern found at index ${s}`,
+        headers: ['Index', 'Text', 'Comparison'],
+        rows: Array.from({ length: Math.min(s + m, text.length) }, (_, idx) => [
+          idx,
+          text[idx],
+          idx >= s && idx < s + m ? '✓' : ''
+        ])
       });
       matches.push(s);
 
       if (s + m < n) {
-        s += m - (table[text[s + m]] ?? -1);
+        const shiftAmount = m - (table[text[s + m]] ?? -1);
+        s += shiftAmount;
       } else {
         s += 1;
       }
@@ -73,7 +101,16 @@ export function boyerMooreSearch(text = '', pattern = '') {
         phase: 'search',
         shift: s,
         j,
+        textIndex: s + j,
+        patternIndex: j,
+        matches: [...matches],
         action: `Mismatch at text[${s + j}] ('${badChar}') → shift by ${shiftAmount}`,
+        headers: ['Index', 'Text', 'Comparison'],
+        rows: Array.from({ length: Math.min(s + m, text.length) }, (_, idx) => [
+          idx,
+          text[idx],
+          idx === s + j ? '✗' : ''
+        ])
       });
 
       // Shift the pattern
