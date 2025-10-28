@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 const pseudocode = {
   kmp: {
@@ -60,30 +60,53 @@ const pseudocode = {
 
 export default function PseudocodePanel({ algorithm, currentStep, phase }) {
   const lines = pseudocode[algorithm]?.[phase] || [];
-  
+  const highlightedLineRef = useRef(null);
+
+  // Scroll the highlighted line into view
+  useEffect(() => {
+    if (highlightedLineRef.current) {
+      highlightedLineRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+      });
+    }
+  }, [currentStep?.pseudocodeLine]);
+
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4">
         <h4 className="font-bold text-lg">
           Pseudocode – {algorithm.toUpperCase()} [{phase === 'preprocessing' ? 'Preprocessing' : 'Search'}]
         </h4>
+        {currentStep && (
+          <p className="text-xs text-blue-100 mt-2">{currentStep.action}</p>
+        )}
       </div>
-      <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
+      <div className="p-0 space-y-0 max-h-96 overflow-y-auto flex-1">
         {lines.length > 0 ? (
-          lines.map((line, idx) => (
-            <div
-              key={idx}
-              className={`p-2 rounded font-mono text-sm transition-all ${
-                currentStep?.pseudocodeLine === idx
-                  ? 'bg-yellow-200 border-l-4 border-yellow-600 font-semibold'
-                  : 'bg-gray-50 border-l-4 border-transparent hover:bg-gray-100'
-              }`}
-            >
-              {line}
-            </div>
-          ))
+          lines.map((line, idx) => {
+            const isHighlighted = currentStep?.pseudocodeLine === idx;
+            return (
+              <div
+                key={idx}
+                ref={isHighlighted ? highlightedLineRef : null}
+                className={`px-4 py-3 font-mono text-sm border-l-4 transition-all duration-200 ${
+                  isHighlighted
+                    ? 'bg-gradient-to-r from-yellow-100 to-yellow-50 border-l-yellow-500 font-semibold text-yellow-900 shadow-md'
+                    : 'bg-gray-50 border-l-transparent hover:bg-gray-100 text-gray-700'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  {isHighlighted && (
+                    <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                  )}
+                  <span>{line}</span>
+                </div>
+              </div>
+            );
+          })
         ) : (
-          <div className="text-sm text-gray-500 italic">No pseudocode available</div>
+          <div className="text-sm text-gray-500 italic p-4">No pseudocode available</div>
         )}
       </div>
     </div>
